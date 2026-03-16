@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import OrganizationSettings from "@/models/OrganizationSettings";
+import { syncOrganizationProfileToBuyerPortal } from "@/lib/webhooks/organization-profile-service";
 
 // Validate API key for cross-origin requests only
 // Internal requests (same origin) are allowed without API key
@@ -130,6 +131,29 @@ export async function PUT(request: NextRequest) {
             { new: true, upsert: true, runValidators: true }
         );
 
+        const webhookSync = await syncOrganizationProfileToBuyerPortal({
+            event: "producer.organization.updated",
+            organization: {
+                organizationId: settings.organizationId,
+                companyName: settings.companyName,
+                legalName: settings.legalName,
+                registrationNumber: settings.registrationNumber,
+                vatNumber: settings.vatNumber,
+                address: settings.address,
+                website: settings.website,
+                onboardingComplete: settings.onboardingComplete,
+                primaryContact: settings.primaryContact,
+                updatedAt: settings.updatedAt,
+            },
+        });
+
+        if (!webhookSync.success) {
+            console.error(
+                "Organization profile webhook sync failed:",
+                webhookSync.error
+            );
+        }
+
         return NextResponse.json({
             organizationId: settings.organizationId,
             companyName: settings.companyName,
@@ -141,6 +165,7 @@ export async function PUT(request: NextRequest) {
             onboardingComplete: settings.onboardingComplete,
             primaryContact: settings.primaryContact,
             updatedAt: settings.updatedAt,
+            webhookSync,
         });
     } catch (error) {
         console.error("Error updating organization settings:", error);
