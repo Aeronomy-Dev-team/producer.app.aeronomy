@@ -35,6 +35,11 @@ interface OrganizationSettings {
     email: string;
     phone: string;
   };
+  webhookSync?: {
+    success: boolean;
+    endpoint?: string;
+    error?: string;
+  };
 }
 
 export default function SettingsPage() {
@@ -105,7 +110,14 @@ export default function SettingsPage() {
         }),
       });
       if (response.ok) {
-        setSaveMessage({ type: "success", text: "Settings saved successfully!" });
+        const data: OrganizationSettings = await response.json();
+        setSaveMessage({
+          type: data.webhookSync?.success === false ? "error" : "success",
+          text:
+            data.webhookSync?.success === false
+              ? "Settings saved, but profile sync to buyer portal failed."
+              : "Settings saved successfully!",
+        });
         setTimeout(() => setSaveMessage(null), 3000);
       } else {
         throw new Error("Failed to save");
