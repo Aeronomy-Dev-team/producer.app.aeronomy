@@ -52,12 +52,12 @@ export async function syncOrganizationProfileToBuyerPortal(
   const { endpoint, apiKey } = getOrganizationWebhookConfig();
 
   try {
-    const headers: HeadersInit = {
-      ...getInterDashboardHeaders("sync_organization_profile"),
-    };
+    const headers = new Headers(
+      getInterDashboardHeaders("sync_organization_profile")
+    );
 
     if (apiKey) {
-      headers["X-API-Key"] = apiKey;
+      headers.set("X-API-Key", apiKey);
     }
 
     const response = await fetch(endpoint, {
