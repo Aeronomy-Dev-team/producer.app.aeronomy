@@ -1,4 +1,5 @@
 import { getInterDashboardHeaders } from "@/lib/jwt";
+import type { ProducerOrganizationProfile } from "@/lib/producer-profile";
 
 export interface OrganizationProfilePayload {
   event: "producer.organization.updated";
@@ -18,6 +19,7 @@ export interface OrganizationProfilePayload {
     };
     updatedAt?: Date | string;
   };
+  profile: ProducerOrganizationProfile;
 }
 
 export interface OrganizationProfileSyncResult {

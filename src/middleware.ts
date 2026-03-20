@@ -12,6 +12,7 @@ const isPublicRoute = createRouteMatcher([
     "/marketplace",
     "/onboarding",
     "/api/onboarding-status",
+    "/api/organization-profile",
     "/api/organization-settings",
 ]);
 
