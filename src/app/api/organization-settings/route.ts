@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import OrganizationSettings from "@/models/OrganizationSettings";
+import { buildProducerOrganizationProfile } from "@/lib/producer-profile";
 import { syncOrganizationProfileToBuyerPortal } from "@/lib/webhooks/organization-profile-service";
 
 // Validate API key for cross-origin requests only
@@ -131,6 +132,11 @@ export async function PUT(request: NextRequest) {
             { new: true, upsert: true, runValidators: true }
         );
 
+        const profile = await buildProducerOrganizationProfile({
+            organizationId,
+            settings,
+        });
+
         const webhookSync = await syncOrganizationProfileToBuyerPortal({
             event: "producer.organization.updated",
             organization: {
@@ -145,6 +151,7 @@ export async function PUT(request: NextRequest) {
                 primaryContact: settings.primaryContact,
                 updatedAt: settings.updatedAt,
             },
+            profile,
         });
 
         if (!webhookSync.success) {
